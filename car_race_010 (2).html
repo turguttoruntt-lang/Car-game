@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Car Race 0.10₺</title>
+<style>
+  body { margin:0; background:#222; overflow:hidden; }
+  canvas { background:#444; display:block; margin:0 auto; }
+</style>
+</head>
+<body>
+<canvas id="game" width="400" height="600"></canvas>
+<script>
+const c = document.getElementById("game");
+const ctx = c.getContext("2d");
+
+let car = { x:200, y:500, w:40, h:60 };
+let fuel = 10; // 0.10₺ = 10 birim
+let obstacles = [];
+let coins = [];
+let score = 0;
+let carSpeed = 5;
+
+function spawnObstacle(){
+    obstacles.push({ x:Math.random()*360, y:-40, w:40, h:40 });
+}
+
+function spawnCoin(){
+    coins.push({ x:Math.random()*360, y:-40, w:25, h:25 });
+}
+
+setInterval(spawnObstacle, 1300);
+setInterval(spawnCoin, 3000);
+
+document.addEventListener("touchstart", ()=>{ car.x += 30; });
+document.addEventListener("keydown", (e)=>{
+    if(e.key=="ArrowLeft") car.x -= 20;
+    if(e.key=="ArrowRight") car.x += 20;
+    if(e.key==" ") carSpeed = 10;
+});
+document.addEventListener("keyup", (e)=>{
+    if(e.key==" ") carSpeed = 5;
+});
+
+function loop(){
+    ctx.clearRect(0,0,400,600);
+    ctx.fillStyle="yellow";
+    ctx.fillRect(car.x, car.y, car.w, car.h);
+
+    ctx.fillStyle="red";
+    for(let o of obstacles){
+        o.y += 5;
+        ctx.fillRect(o.x, o.y, o.w, o.h);
+
+        if(o.y > 600) o.y=-40;
+
+        if(car.x<o.x+o.w && car.x+car.w>o.x && car.y<o.y+o.h && car.y+car.h>o.y){
+            fuel--;
+        }
+    }
+
+    ctx.fillStyle="gold";
+    for(let c2 of coins){
+        c2.y += 4;
+        ctx.fillRect(c2.x, c2.y, c2.w, c2.h);
+
+        if(car.x<c2.x+c2.w && car.x+car.w>c2.x && car.y<c2.y+c2.h && car.y+car.h>c2.y){
+            fuel += 1;
+            score += 5;
+        }
+    }
+
+    score += 1;
+    ctx.fillStyle="white";
+    ctx.fillText("Fuel: "+fuel/10+"₺", 10,20);
+    ctx.fillText("Score: "+score, 10,40);
+
+    if(fuel <= 0){
+        ctx.fillText("GAME OVER", 150,300);
+        return;
+    }
+
+    car.y -= carSpeed * 0.2;
+
+    requestAnimationFrame(loop);
+}
+loop();
+</script>
+</body>
+</html>
